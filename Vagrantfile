@@ -34,14 +34,19 @@ echo "freetz-menu" >>"$AUTOSTART_FILE"
 chown builduser "$AUTOSTART_FILE"
 
 LINE=`sed -n 's/^ExecStart=-\\/sbin\\/agetty /&--autologin builduser /p' /etc/systemd/system/getty.target.wants/getty@tty1.service`
-mkdir -p /etc/systemd/system/getty@tty1.service.d/
-cat <<EOF >/etc/systemd/system/getty@tty1.service.d/override.conf
+# replace this
+mkdir -p '/etc/systemd/system/getty@tty1.service.d/'
+cat <<EOF> /etc/systemd/system/getty@tty1.service.d/override.conf
 [Service]
 ExecStart=
 $LINE
 EOF
 
 SCRIPT
+
+# replace with that (see https://github.com/systemd/systemd/issues/21862)
+### echo -e "[Service]\nExecStart=\n$LINE\n" | SYSTEMD_EDITOR=tee systemctl edit getty@tty1.service
+
 
 Vagrant.configure("2") do |config|
   config.vm.box = "ubuntu/focal64"
