@@ -17,6 +17,7 @@ chmod +x /usr/bin/freetz-make
 
 cat <<'EOF' >/usr/bin/freetz-menu
 # TODO ADD FILE HERE
+EOF
 chmod +x /usr/bin/freetz-menu
 
 cat <<'EOF' >/usr/bin/docker-shell
@@ -29,10 +30,11 @@ chmod +x /usr/bin/docker-shell
 useradd -m -G sudo,docker -s /bin/bash builduser
 passwd -d builduser
 AUTOSTART_FILE="$(getent passwd builduser | cut -f 6 -d':')/.bash_login"
-echo "freetz-menu" >>"$AUTOSTART_FILE
+echo "freetz-menu" >>"$AUTOSTART_FILE"
 chown builduser "$AUTOSTART_FILE"
 
 LINE=`sed -n 's/^ExecStart=-\\/sbin\\/agetty /&--autologin builduser /p' /etc/systemd/system/getty.target.wants/getty@tty1.service`
+mkdir -p /etc/systemd/system/getty@tty1.service.d/
 cat <<EOF >/etc/systemd/system/getty@tty1.service.d/override.conf
 [Service]
 ExecStart=
