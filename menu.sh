@@ -21,6 +21,23 @@ configSubMenu() {
 	SET_PASSWD="Set password for builduser"
 	NO_AUTOSTART="Disable script autostart"
 	NO_AUTOLOGIN="Disable autologin"
+	YES_AUTOLOGIN="Enable autologin"
+
+hasTextBlock() {
+	echo "$1" | patch --dry-run -d'/' -NRE -p0 >/dev/null
+}
+
+autoLoginTextBlock() {
+LINE=`sed -n 's/^ExecStart=-\\/sbin\\/agetty /&--autologin builduser /p' /etc/systemd/system/getty.target.wants/getty@tty1.service`
+cat <<EOF
+--- /dev/null   1970-01-01 00:00:00.000000000 +0000
++++ /etc/systemd/system/getty@tty1.service.d/override.conf      1970-01-01 00:00:00.000000000 +0000
+@@ -0,0 +1,3 @@
++[Service]
++ExecStart=
++$LINE
+EOF
+}
 
 while :; do
 	value=()
@@ -28,8 +45,7 @@ while :; do
 	# [ "$(sudo passwd --status builduser | cut -d' ' -f2)" = 'NP' ] && value+=("$SET_PASSWD" "builduser has no password, you can set one.")
 	value+=("$SET_PASSWD" "set or update the password for builduser.")
 	[ -r "$AUTOSTART_FILE" ] && grep "$THIS_FILE" "$AUTOSTART_FILE" && value+=("$NO_AUTOSTART" "Disables this script's autostart on login.")
-	[ -e "$AUTOLOGIN_FILE" ] && value+=("$NO_AUTOLOGIN" "Disables the autologin on virtual console 1.")
-
+	hasTextBlock "$(autoLoginTextBlock)" && value+=("$NO_AUTOLOGIN" "Disables the autologin on virtual console 1.") || value+=("$YES_AUTOLOGIN" "Enables the autologin on virtual console 1.")
 	CHOICE=$(whiptail --title "Freetz-NG build config menu" --menu "Choose an option" 15 98 6 "${value[@]}" 3>&1 1>&2 2>&3)
 	[ "$?" -eq 0 ] || return
 
@@ -45,15 +61,22 @@ ${PASSWORD1}
 ${PASSWORD2}
 EOD
 		;;
-		"$NO_AUTOSTART")
-			sed -i "/^$THIS_FILE\$/d" "$AUTOSTART_FILE" && [ ! -s "$AUTOSTART_FILE" ]  && rm "$AUTOSTART_FILE"
+		"$YES_AUTOLOGIN")
+			sudo mkdir -p $(dirname "$AUTOLOGIN_FILE")
+			autoLoginTextBlock | sudo patch -d'/' -N -p0 >/dev/null
 		;;
 		"$NO_AUTOLOGIN")
-			sudo rm -f "$AUTOLOGIN_FILE"
+			autoLoginTextBlock | sudo patch -d'/' -NRE -p0 >/dev/null
 		;;
+                "$NO_AUTOSTART")
+                       sed -i "/^$THIS_FILE\$/d" "$AUTOSTART_FILE" && [ ! -s "$AUTOSTART_FILE" ]  && rm "$AUTOSTART_FILE"
+                ;;
+
 	esac
 done
 }
+
+
 
 while :; do
 	value=()
