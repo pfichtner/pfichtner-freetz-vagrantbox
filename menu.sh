@@ -3,7 +3,8 @@
 IMAGE="pfichtner/freetz:22.04"
 GH_REPO="https://github.com/Freetz-NG/freetz-ng.git"
 LOCAL_REPO=$(basename -s '.git' "$GH_REPO")
-AUTOSTART_FILE="$HOME/.bash_login"
+USERNAME=builduser
+AUTOSTART_FILE="$(getent passwd $USERNAME | cut -f 6 -d':')/.bash_login"
 AUTOLOGIN_FILE="/etc/systemd/system/getty@tty1.service.d/override.conf"
 THIS_FILE=$(readlink -f "$0")
 
@@ -18,8 +19,9 @@ EXIT="Exit"
 
 configSubMenu() {
 	DOCKER_PULL="Update internal build system"
-	SET_PASSWD="Set password for builduser"
+	SET_PASSWD="Set password for $USERNAME"
 	NO_AUTOSTART="Disable script autostart"
+	YES_AUTOSTART="Enable script autostart"
 	NO_AUTOLOGIN="Disable autologin"
 	YES_AUTOLOGIN="Enable autologin"
 
@@ -28,7 +30,7 @@ hasTextBlock() {
 }
 
 autoLoginTextBlock() {
-LINE=`sed -n 's/^ExecStart=-\\/sbin\\/agetty /&--autologin builduser /p' /etc/systemd/system/getty.target.wants/getty@tty1.service`
+LINE=`sed -n 's/^ExecStart=-\\/sbin\\/agetty /&--autologin '$USERNAME' /p' /etc/systemd/system/getty.target.wants/getty@tty1.service`
 cat <<EOF
 --- /dev/null   1970-01-01 00:00:00.000000000 +0000
 +++ /etc/systemd/system/getty@tty1.service.d/override.conf      1970-01-01 00:00:00.000000000 +0000
@@ -42,9 +44,9 @@ EOF
 while :; do
 	value=()
 	value+=("$DOCKER_PULL" "Checks docker hub for update of the internal docker image.")
-	# [ "$(sudo passwd --status builduser | cut -d' ' -f2)" = 'NP' ] && value+=("$SET_PASSWD" "builduser has no password, you can set one.")
-	value+=("$SET_PASSWD" "set or update the password for builduser.")
-	[ -r "$AUTOSTART_FILE" ] && grep "$THIS_FILE" "$AUTOSTART_FILE" && value+=("$NO_AUTOSTART" "Disables this script's autostart on login.")
+	# [ "$(sudo passwd --status $USERNAME | cut -d' ' -f2)" = 'NP' ] && value+=("$SET_PASSWD" "$USERNAME has no password, you can set one.")
+	value+=("$SET_PASSWD" "set or update the password for $USERNAME.")
+	([ -r "$AUTOSTART_FILE" ] && grep -q "$THIS_FILE" "$AUTOSTART_FILE") && value+=("$NO_AUTOSTART" "Disables this script's autostart on login.") || value+=("$YES_AUTOSTART" "Enables this script's autostart on login.")
 	hasTextBlock "$(autoLoginTextBlock)" && value+=("$NO_AUTOLOGIN" "Disables the autologin on virtual console 1.") || value+=("$YES_AUTOLOGIN" "Enables the autologin on virtual console 1.")
 	CHOICE=$(whiptail --title "Freetz-NG build config menu" --menu "Choose an option" 15 98 6 "${value[@]}" 3>&1 1>&2 2>&3)
 	[ "$?" -eq 0 ] || return
@@ -68,8 +70,11 @@ EOD
 		"$NO_AUTOLOGIN")
 			autoLoginTextBlock | sudo patch -d'/' -NRE -p0 >/dev/null
 		;;
+                "$YES_AUTOSTART")
+			echo "[ -x $THIS_FILE ] && $THIS_FILE" | sudo tee -a "$AUTOSTART_FILE"
+                ;;
                 "$NO_AUTOSTART")
-                       sed -i "/^$THIS_FILE\$/d" "$AUTOSTART_FILE" && [ ! -s "$AUTOSTART_FILE" ]  && rm "$AUTOSTART_FILE"
+                       sudo sed -i "\|^\[ -x $THIS_FILE \] && $THIS_FILE$|d" "$AUTOSTART_FILE" && [ ! -s "$AUTOSTART_FILE" ]  && sudo rm "$AUTOSTART_FILE"
                 ;;
 
 	esac
@@ -82,8 +87,8 @@ while :; do
 	value=()
 	[ -d "$LOCAL_REPO" ] || value+=("$CLONE_REPO" "Creates a new clone of the Freetz-NG github repository.")
 	[ -d "$LOCAL_REPO" ] && value+=("$PULL_REPO" "Updates the local Freetz-NG clone.")
-	[ -d "$LOCAL_REPO" ] && value+=("$MAKE_CONFIG" "cd into the checkout directory an calls \"make menuconfig\".")
-	[ -r "$LOCAL_REPO/.config" ] && value+=("$MAKE" "cd into the checkout directory an calls \"make\".")
+	[ -d "$LOCAL_REPO" ] && value+=("$MAKE_CONFIG" "Configure the firmware (\"make menuconfig\").")
+	[ -r "$LOCAL_REPO/.config" ] && value+=("$MAKE" "Build the firmware (\"make\").")
 	value+=("$CONFIGURATION" "Config/Tweak this tool.")
 
 	CHOICE=$(whiptail --title "Freetz-NG build menu" --menu "Choose an option" 15 98 6 "${value[@]}" 3>&1 1>&2 2>&3)
