@@ -5,8 +5,7 @@ $script = <<-SCRIPT
 cat <<'EOF' >/usr/bin/run-in-docker
 #!/bin/sh
 IMAGE="pfichtner/freetz"
-BUILD_USER_HOME="$HOME"
-docker run -e TERM -it --rm -e BUILD_USER="$USER" -e BUILD_USER_UID=$(id -u) -e BUILD_USER_HOME="$BUILD_USER_HOME" -v "$HOME":"$BUILD_USER_HOME" "$IMAGE" "$@"
+docker run -e TERM -it --rm -w "$PWD" -e BUILD_USER="$USER" -e BUILD_USER_UID=$(id -u) -e BUILD_USER_HOME="$HOME" -v "$HOME":"$HOME" "$IMAGE" "$@"
 EOF
 chmod +x /usr/bin/run-in-docker
 
