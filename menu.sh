@@ -16,6 +16,9 @@ MAKE="Call make"
 CONFIGURATION="Configuration"
 EXIT="Exit"
 
+pressAnyKey() {
+	echo; read -n 1 -p "Press Enter to continue..." && clear
+}
 
 configSubMenu() {
 	DOCKER_PULL="Update internal build system"
@@ -46,12 +49,13 @@ while :; do
 	value+=("$SET_PASSWD" "set or update the password for $USERNAME.")
 	([ -r "$AUTOSTART_FILE" ] && grep -q "^\[ -x $THIS_FILE \] && $THIS_FILE$" "$AUTOSTART_FILE") && value+=("$NO_AUTOSTART" "Disables this script's autostart on login.") || value+=("$YES_AUTOSTART" "Enables this script's autostart on login.")
 	hasTextBlock "$AUTOLOGIN_FILE" "$(autoLoginTextBlock)" && value+=("$NO_AUTOLOGIN" "Disables the autologin on virtual console 1.") || value+=("$YES_AUTOLOGIN" "Enables the autologin on virtual console 1.")
-	CHOICE=$(whiptail --title "Freetz-NG build config menu" --menu "Choose an option" 15 98 6 "${value[@]}" 3>&1 1>&2 2>&3)
+	CHOICE=$(whiptail --title "Freetz-NG build config menu" --menu "Build Config Menu" 15 98 6 "${value[@]}" 3>&1 1>&2 2>&3)
 	[ "$?" -eq 0 ] || return
 
 	case $CHOICE in
 		"$DOCKER_PULL")
 			docker pull "$IMAGE"
+			pressAnyKey
 		;;
 		"$SET_PASSWD")
 		PASSWORD1=$(whiptail --passwordbox "please enter your secret password" 8 78 --title "password dialog" 3>&1 1>&2 2>&3)
@@ -91,24 +95,29 @@ while :; do
 	[ -r "$LOCAL_REPO/.config" ] && value+=("$MAKE" "Build the firmware (\"make\").")
 	value+=("$CONFIGURATION" "Config/Tweak this tool.")
 
-	CHOICE=$(whiptail --title "Freetz-NG build menu" --menu "Choose an option" 15 98 6 "${value[@]}" 3>&1 1>&2 2>&3)
+	CHOICE=$(whiptail --title "Freetz-NG build menu" --menu "Main Menu" 15 98 6 "${value[@]}" 3>&1 1>&2 2>&3)
 	[ "$?" -eq 0 ] || exit
 
 	case $CHOICE in
 		"$CLONE_REPO")
 			umask 0022 && git clone "$GH_REPO" "$LOCAL_REPO"
+			pressAnyKey
 		;;
 		"$PULL_REPO")
 			(cd "$LOCAL_REPO" && git pull)
+			pressAnyKey
 		;;
 		"$MAKE_CONFIG")
 			(cd "$LOCAL_REPO" && freetz-make menuconfig)
 		;;
 		"$MAKE")
 			(cd "$LOCAL_REPO" && freetz-make)
+			pressAnyKey
 		;;
 		"$DOCKER_PULL")
 			docker pull "$IMAGE"
+			pressAnyKey
+
 		;;
 		"$CONFIGURATION")
 			configSubMenu
