@@ -17,7 +17,7 @@ jobs:
         vagrant up --provider virtualbox
     - name: Export VirtualBox Image
       run: |
-        vagrant package --base pfichtner-freetz-vagrantbox --output pfichtner-freetz-vagrantbox.box
+        vagrant package --output pfichtner-freetz-vagrantbox.box
       env:
         VAGRANT_DEFAULT_PROVIDER: virtualbox
     - name: Release VirtualBox Image
