@@ -1,0 +1,27 @@
+name: Build, Export, and Release VirtualBox Image
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install Vagrant
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y vagrant
+    - name: Generate VirtualBox Image
+      run: |
+        vagrant up --provider virtualbox
+    - name: Export VirtualBox Image
+      run: |
+        vagrant package --base pfichtner-freetz-vagrantbox --output pfichtner-freetz-vagrantbox.box
+      env:
+        VAGRANT_DEFAULT_PROVIDER: virtualbox
+    - name: Release VirtualBox Image
+      uses: actions/upload-artifact@v2
+      with:
+        name: pfichtner-freetz-vagrantbox.box
+        path: pfichtner-freetz-vagrantbox.box
