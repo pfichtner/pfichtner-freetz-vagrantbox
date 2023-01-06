@@ -26,18 +26,16 @@ configSubMenu() {
 	YES_AUTOLOGIN="Enable autologin"
 
 hasTextBlock() {
-	echo "$1" | patch --dry-run -d'/' -NRE -p0 >/dev/null
+	[ -r "$1" ] && grep -Fq "$2" "$1"
 }
+
 
 autoLoginTextBlock() {
 LINE=`sed -n 's/^ExecStart=-\\/sbin\\/agetty /&--autologin '$USERNAME' /p' /etc/systemd/system/getty.target.wants/getty@tty1.service`
 cat <<EOF
---- /dev/null   1970-01-01 00:00:00.000000000 +0000
-+++ /etc/systemd/system/getty@tty1.service.d/override.conf      1970-01-01 00:00:00.000000000 +0000
-@@ -0,0 +1,3 @@
-+[Service]
-+ExecStart=
-+$LINE
+[Service]
+ExecStart=
+$LINE
 EOF
 }
 
@@ -46,8 +44,8 @@ while :; do
 	value+=("$DOCKER_PULL" "Checks docker hub for update of the internal docker image.")
 	# [ "$(sudo passwd --status $USERNAME | cut -d' ' -f2)" = 'NP' ] && value+=("$SET_PASSWD" "$USERNAME has no password, you can set one.")
 	value+=("$SET_PASSWD" "set or update the password for $USERNAME.")
-	([ -r "$AUTOSTART_FILE" ] && grep -q "$THIS_FILE" "$AUTOSTART_FILE") && value+=("$NO_AUTOSTART" "Disables this script's autostart on login.") || value+=("$YES_AUTOSTART" "Enables this script's autostart on login.")
-	hasTextBlock "$(autoLoginTextBlock)" && value+=("$NO_AUTOLOGIN" "Disables the autologin on virtual console 1.") || value+=("$YES_AUTOLOGIN" "Enables the autologin on virtual console 1.")
+	([ -r "$AUTOSTART_FILE" ] && grep -q "^\[ -x $THIS_FILE \] && $THIS_FILE$" "$AUTOSTART_FILE") && value+=("$NO_AUTOSTART" "Disables this script's autostart on login.") || value+=("$YES_AUTOSTART" "Enables this script's autostart on login.")
+	hasTextBlock "$AUTOLOGIN_FILE" "$(autoLoginTextBlock)" && value+=("$NO_AUTOLOGIN" "Disables the autologin on virtual console 1.") || value+=("$YES_AUTOLOGIN" "Enables the autologin on virtual console 1.")
 	CHOICE=$(whiptail --title "Freetz-NG build config menu" --menu "Choose an option" 15 98 6 "${value[@]}" 3>&1 1>&2 2>&3)
 	[ "$?" -eq 0 ] || return
 
@@ -65,13 +63,15 @@ EOD
 		;;
 		"$YES_AUTOLOGIN")
 			sudo mkdir -p $(dirname "$AUTOLOGIN_FILE")
-			autoLoginTextBlock | sudo patch -d'/' -N -p0 >/dev/null
+			MULTILINE_STRING=$(autoLoginTextBlock)
+			echo "$MULTILINE_STRING" | sudo tee -a "$AUTOLOGIN_FILE" >/dev/null
 		;;
 		"$NO_AUTOLOGIN")
-			autoLoginTextBlock | sudo patch -d'/' -NRE -p0 >/dev/null
+			REMAINING=$(awk 'FNR==NR{a[$0];next} !($0 in a)' <(autoLoginTextBlock) <(cat "$AUTOLOGIN_FILE"))
+			[ -n "$REMAINING" ] && echo "$REMAINING" | sudo tee "$AUTOLOGIN_FILE" >/dev/null || (sudo rm "$AUTOLOGIN_FILE" && sudo rmdir --ignore-fail-on-non-empty -p $(dirname "$AUTOLOGIN_FILE"))
 		;;
                 "$YES_AUTOSTART")
-			echo "[ -x $THIS_FILE ] && $THIS_FILE" | sudo tee -a "$AUTOSTART_FILE"
+			echo "[ -x $THIS_FILE ] && $THIS_FILE" | sudo tee -a "$AUTOSTART_FILE" >/dev/null
                 ;;
                 "$NO_AUTOSTART")
                        sudo sed -i "\|^\[ -x $THIS_FILE \] && $THIS_FILE$|d" "$AUTOSTART_FILE" && [ ! -s "$AUTOSTART_FILE" ]  && sudo rm "$AUTOSTART_FILE"
