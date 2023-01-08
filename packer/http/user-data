@@ -1,11 +1,11 @@
 #cloud-config
 autoinstall:
   version: 1
-  locale: en_US.UTF-8
+  locale: de_DE.UTF-8
   refresh-installer:
       update: yes
   keyboard:
-      layout: us
+      layout: de
   network:
       network:
           version: 2
@@ -42,16 +42,7 @@ autoinstall:
   user-data:
       disable_root: false
   packages:
-      - ca-certificates
-      - cloud-guest-utils
-      - cloud-init
-      - curl
-      - e2fsprogs
-      - iproute2
       - openssh-server
-      - perl
-      - python3
-      - rsync
       - sudo
   early-commands:
       - systemctl stop ssh.service
