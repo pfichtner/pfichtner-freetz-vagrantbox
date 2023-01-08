@@ -16,6 +16,9 @@ autoinstall:
       primary:
           - arches: [default]
             uri: http://archive.ubuntu.com/ubuntu/
+      http_proxy: ${http_proxy}
+      https_proxy: ${https_proxy}
+
   storage:
       swap:
           size: 0
