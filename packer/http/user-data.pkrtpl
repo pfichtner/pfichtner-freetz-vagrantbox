@@ -1,9 +1,12 @@
 #cloud-config
 autoinstall:
   version: 1
-  locale: de_DE.UTF-8
   refresh-installer:
       update: yes
+  reporting:
+    stdout:
+      type: print
+  locale: de_DE.UTF-8
   keyboard:
       layout: de
   network:
@@ -15,7 +18,6 @@ autoinstall:
   apt:
       http_proxy: ${http_proxy}
       https_proxy: ${https_proxy}
-
   storage:
       swap:
           size: 0
