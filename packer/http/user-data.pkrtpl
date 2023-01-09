@@ -13,9 +13,6 @@ autoinstall:
               eth0:
                  dhcp4: yes
   apt:
-      primary:
-          - arches: [default]
-            uri: http://archive.ubuntu.com/ubuntu/
       http_proxy: ${http_proxy}
       https_proxy: ${https_proxy}
 
