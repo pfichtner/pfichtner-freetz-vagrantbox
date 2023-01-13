@@ -24,6 +24,10 @@ variable "https_proxy" {
   type = string
   default = env("https_proxy")
 }
+variable "ftp_proxy" {
+  type = string
+  default = env("ftp_proxy")
+}
 
 source "virtualbox-iso" "virtualbox-iso" {
   boot_command           = ["<tab><tab><tab><tab><tab><tab><tab><tab><tab><tab><wait>", "<tab><tab><tab><tab><tab><tab><tab><tab><tab><tab><wait>", "<tab><tab><tab><tab><tab><tab><tab><tab><tab><tab><wait>", "<tab><tab><tab><tab><tab><tab><tab><tab><tab><tab><wait>", "<tab><tab><tab><tab><tab><tab><tab><tab><tab><tab><wait>", "<tab><tab><tab><tab><tab><tab><tab><tab><tab><tab><wait>", "<tab><tab><tab><tab><tab><tab><tab><tab><tab><tab><wait>", "<tab><tab><tab><tab><tab><tab><tab><tab><tab><tab><wait>", "<tab><tab><tab><tab><tab><tab><tab><tab><tab><tab><wait>", "<tab><tab><tab><tab><tab><tab><tab><tab><tab><tab><wait>", "c<wait2>", "set gfxpayload=keep<enter><wait2>", "linux /casper/vmlinuz <wait2>", "autoinstall quiet fsck.mode=skip <wait2>", "net.ifnames=0 biosdevname=0 systemd.unified_cgroup_hierarchy=0 <wait2>", "ds=\"nocloud-net;s=http://{{ .HTTPIP }}:{{ .HTTPPort }}/\" <wait2>", "---<enter><wait2>", "initrd /casper/initrd<enter><wait5>", "boot<enter>"]
@@ -33,7 +37,7 @@ source "virtualbox-iso" "virtualbox-iso" {
   guest_os_type          = "Ubuntu_64"
   headless               = true
   http_content = {
-    "/user-data" = templatefile("http/user-data.pkrtpl", { http_proxy = "${var.http_proxy}", https_proxy = "${var.https_proxy}"})
+    "/user-data" = templatefile("http/user-data.pkrtpl", { http_proxy = "${var.http_proxy}", https_proxy = "${var.https_proxy}", ftp_proxy = "${var.ftp_proxy}"})
     "/meta-data"  = file("http/meta-data")
   }
   iso_checksum           = "874452797430a94ca240c95d8503035aa145bd03ef7d84f9b23b78f3c5099aed"

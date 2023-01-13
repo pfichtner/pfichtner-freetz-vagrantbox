@@ -18,6 +18,7 @@ autoinstall:
   apt:
       http_proxy: ${http_proxy}
       https_proxy: ${https_proxy}
+      ftp_proxy: ${ftp_proxy}
   storage:
       swap:
           size: 0
