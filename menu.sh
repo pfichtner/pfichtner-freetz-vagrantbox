@@ -1,8 +1,8 @@
 #!/bin/bash
 
-IMAGE="pfichtner/freetz:22.04"
+IMAGE="pfichtner/freetz"
 GH_REPO="https://github.com/Freetz-NG/freetz-ng.git"
-LOCAL_REPO=$(basename -s '.git' "$GH_REPO")
+LOCAL_REPO=$(basename "$GH_REPO" '.git')
 USERNAME=builduser
 AUTOSTART_FILE="$(getent passwd $USERNAME | cut -f 6 -d':')/.bash_login"
 AUTOLOGIN_FILE="/etc/systemd/system/getty@tty1.service.d/override.conf"
@@ -100,7 +100,7 @@ while :; do
 
 	case $CHOICE in
 		"$CLONE_REPO")
-			umask 0022 && git clone "$GH_REPO" "$LOCAL_REPO"
+			run-in-docker git clone "$GH_REPO" "$LOCAL_REPO"
 			pressAnyKey
 		;;
 		"$PULL_REPO")
@@ -108,10 +108,10 @@ while :; do
 			pressAnyKey
 		;;
 		"$MAKE_CONFIG")
-			(cd "$LOCAL_REPO" && freetz-make menuconfig)
+			(cd "$LOCAL_REPO" && run-in-docker make menuconfig)
 		;;
 		"$MAKE")
-			(cd "$LOCAL_REPO" && freetz-make)
+			(cd "$LOCAL_REPO" && run-in-docker make)
 			pressAnyKey
 		;;
 		"$DOCKER_PULL")
