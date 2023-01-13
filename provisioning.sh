@@ -16,9 +16,9 @@ chmod +x /usr/bin/freetz-make
 cat <<'EOM' >/usr/bin/freetz-menu
 #!/bin/bash
 
-IMAGE="pfichtner/freetz:22.04"
+IMAGE="pfichtner/freetz"
 GH_REPO="https://github.com/Freetz-NG/freetz-ng.git"
-LOCAL_REPO=$(basename -s '.git' "$GH_REPO")
+LOCAL_REPO=$(basename "$GH_REPO" '.git')
 USERNAME=builduser
 AUTOSTART_FILE="$(getent passwd $USERNAME | cut -f 6 -d':')/.bash_login"
 AUTOLOGIN_FILE="/etc/systemd/system/getty@tty1.service.d/override.conf"
@@ -149,8 +149,13 @@ run-in-docker /bin/bash -l
 EOF
 chmod +x /usr/bin/docker-shell
 
-#useradd -m -G sudo,docker -s /bin/docker-shell builduser
-useradd -m -G sudo,docker -s /bin/bash builduser
+# shell could be also the /bin/docker-shell which gives a login shell directly in the docker container
+command -v useradd && useradd -m -G sudo,docker -s /bin/bash builduser || (adduser -D -s /bin/bash builduser && addgroup builduser docker)
+if [ -r "/etc/sudoers.d/vagrant" ]; then
+	cp -a /etc/sudoers.d/vagrant /etc/sudoers.d/builduser && sed -i 's/vagrant/builduser/g' /etc/sudoers.d/builduser
+else
+	usermod -aG sudo builduser
+fi
 passwd -d builduser
 AUTOSTART_FILE="$(getent passwd builduser | cut -f 6 -d':')/.bash_login"
 echo "freetz-menu" >>"$AUTOSTART_FILE"
