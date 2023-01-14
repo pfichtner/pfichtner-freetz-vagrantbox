@@ -4,7 +4,7 @@ IMAGE="pfichtner/freetz"
 GH_REPO="https://github.com/Freetz-NG/freetz-ng.git"
 LOCAL_REPO=$(basename "$GH_REPO" '.git')
 USERNAME=builduser
-AUTOSTART_FILE="$(getent passwd $USERNAME | cut -f 6 -d':')/.bash_login"
+command -v getent && AUTOSTART_FILE="$(getent passwd $USERNAME | cut -f 6 -d':')/.bash_login" || AUTOSTART_FILE="$(cat /etc/passwd | grep "^$USERNAME:" | cut -f 6 -d':')/.bash_login" || 
 AUTOLOGIN_FILE="/etc/systemd/system/getty@tty1.service.d/override.conf"
 THIS_FILE=$(readlink -f "$0")
 
