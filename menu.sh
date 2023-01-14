@@ -133,7 +133,7 @@ EOD
 }
 
 mainChoice() {
-    case $1 in
+    case "$1" in
 	    "$CLONE_REPO")
 		    run-in-docker git clone "$GH_REPO" "$LOCAL_REPO"
 		    pressAnyKey
@@ -181,7 +181,7 @@ main() {
 
 	    CHOICE=$(whiptail --title "Freetz-NG build menu" --menu "Main Menu" 15 98 6 "${value[@]}" 3>&1 1>&2 2>&3)
 	    [ "$?" -eq 0 ] || exit
-	    mainChoice $CHOICE
+	    mainChoice "$CHOICE"
     done
 }
 
