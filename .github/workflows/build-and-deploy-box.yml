@@ -8,16 +8,19 @@ jobs:
     runs-on: macos-10.15
     steps:
     - uses: actions/checkout@v2
-    - name: Generate VirtualBox Image
+    - name: Create virtual machine using vagrant
       run: |
         cd alpine && vagrant up --provider virtualbox
-    - name: Export VirtualBox Image
+    - name: Shutdown virtual machine
+      run: |
+        cd alpine && vagrant halt
+    - name: Export virtual machine to OVA
       run: |
         cd alpine && packer build -var 'vm_name=pfichtner-freetzg-buildsystem' -var 'output_directory=ovaexport' vagrantbox2ova.json
-    - name: Destroy machine
+    - name: Destroy virtual machine
       run: |
         cd alpine && vagrant destroy -f
-    - name: Release VirtualBox Image
+    - name: Release OVA
       uses: actions/upload-artifact@v2
       with:
         name: pfichtner-freetz-vagrantbox.box
