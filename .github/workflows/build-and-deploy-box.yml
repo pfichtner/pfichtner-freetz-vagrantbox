@@ -14,14 +14,15 @@ jobs:
         sudo apt-get install -y vagrant
     - name: Generate VirtualBox Image
       run: |
-        vagrant up --provider virtualbox
+        cd alpine && vagrant up --provider virtualbox
     - name: Export VirtualBox Image
       run: |
-        vagrant package --output pfichtner-freetz-vagrantbox.box
-      env:
-        VAGRANT_DEFAULT_PROVIDER: virtualbox
+        cd alpine && packer build -var 'vm_name=pfichtner-freetzg-buildsystem' -var 'output_directory=ovaexport' vagrantbox2ova.json
+    - name: Destroy machine
+      run: |
+        cd alpine && vagrant destroy -f
     - name: Release VirtualBox Image
       uses: actions/upload-artifact@v2
       with:
         name: pfichtner-freetz-vagrantbox.box
-        path: pfichtner-freetz-vagrantbox.box
+        path: alpine/ovaexport/pfichtner-freetzg-buildsystem.ova
