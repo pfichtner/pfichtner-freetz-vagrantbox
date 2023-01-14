@@ -23,5 +23,6 @@ jobs:
     - name: Release OVA
       uses: actions/upload-artifact@v2
       with:
+        name: pfichtner-freetz-vagrantbox.box
         if-no-files-found: error
         path: alpine/ovaexport/pfichtner-freetzg-buildsystem.ova
