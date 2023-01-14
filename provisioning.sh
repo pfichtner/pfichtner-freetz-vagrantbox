@@ -20,7 +20,7 @@ IMAGE="pfichtner/freetz"
 GH_REPO="https://github.com/Freetz-NG/freetz-ng.git"
 LOCAL_REPO=$(basename "$GH_REPO" '.git')
 USERNAME=builduser
-AUTOSTART_FILE="$(getent passwd $USERNAME | cut -f 6 -d':')/.bash_login"
+command -v getent && AUTOSTART_FILE="$(getent passwd $USERNAME | cut -f 6 -d':')/.bash_login" || AUTOSTART_FILE="$(cat /etc/passwd | grep "^$USERNAME:" | cut -f 6 -d':')/.bash_login" || 
 AUTOLOGIN_FILE="/etc/systemd/system/getty@tty1.service.d/override.conf"
 THIS_FILE=$(readlink -f "$0")
 
@@ -116,7 +116,7 @@ while :; do
 
 	case $CHOICE in
 		"$CLONE_REPO")
-			umask 0022 && git clone "$GH_REPO" "$LOCAL_REPO"
+			run-in-docker git clone "$GH_REPO" "$LOCAL_REPO"
 			pressAnyKey
 		;;
 		"$PULL_REPO")
@@ -124,10 +124,10 @@ while :; do
 			pressAnyKey
 		;;
 		"$MAKE_CONFIG")
-			(cd "$LOCAL_REPO" && freetz-make menuconfig)
+			(cd "$LOCAL_REPO" && run-in-docker make menuconfig)
 		;;
 		"$MAKE")
-			(cd "$LOCAL_REPO" && freetz-make)
+			(cd "$LOCAL_REPO" && run-in-docker make)
 			pressAnyKey
 		;;
 		"$DOCKER_PULL")
@@ -151,13 +151,14 @@ chmod +x /usr/bin/docker-shell
 
 # shell could be also the /bin/docker-shell which gives a login shell directly in the docker container
 command -v useradd && useradd -m -G sudo,docker -s /bin/bash builduser || (adduser -D -s /bin/bash builduser && addgroup builduser docker)
-if [ -r "/etc/sudoers.d/vagrant" ]; then
-	cp -a /etc/sudoers.d/vagrant /etc/sudoers.d/builduser && sed -i 's/vagrant/builduser/g' /etc/sudoers.d/builduser
+DEFAULT_USER=$(basename /etc/sudoers.d/*)
+if [ -r "/etc/sudoers.d/$DEFAULT_USER" ]; then
+	cp -a /etc/sudoers.d/$DEFAULT_USER /etc/sudoers.d/builduser && sed -i "s/$DEFAULT_USER/builduser/g" /etc/sudoers.d/builduser
 else
 	usermod -aG sudo builduser
 fi
 passwd -d builduser
-AUTOSTART_FILE="$(getent passwd builduser | cut -f 6 -d':')/.bash_login"
+command -v getent && AUTOSTART_FILE="$(getent passwd builduser | cut -f 6 -d':')/.bash_login" || AUTOSTART_FILE="$(cat /etc/passwd | grep "^builduser:" | cut -f 6 -d':')/.bash_login" || 
 echo "freetz-menu" >>"$AUTOSTART_FILE"
 chown builduser "$AUTOSTART_FILE"
 
