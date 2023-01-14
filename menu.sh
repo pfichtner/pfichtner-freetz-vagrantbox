@@ -1,10 +1,18 @@
 #!/bin/bash
 
+hasCommand() {
+	command -v "$1" >/dev/null 2>/dev/null
+}
+
+getUserHome() {
+	hasCommand getent && getent passwd "$1" | cut -f 6 -d':' || cat /etc/passwd | grep "^$1:" | cut -f 6 -d':'
+}
+
 IMAGE="pfichtner/freetz"
 GH_REPO="https://github.com/Freetz-NG/freetz-ng.git"
 LOCAL_REPO=$(basename "$GH_REPO" '.git')
 USERNAME=builduser
-command -v getent && AUTOSTART_FILE="$(getent passwd $USERNAME | cut -f 6 -d':')/.bash_login" || AUTOSTART_FILE="$(cat /etc/passwd | grep "^$USERNAME:" | cut -f 6 -d':')/.bash_login" || 
+AUTOSTART_FILE="$(getUserHome $USERNAME)/.bash_login"
 AUTOLOGIN_FILE="/etc/systemd/system/getty@tty1.service.d/override.conf"
 THIS_FILE=$(readlink -f "$0")
 
@@ -12,9 +20,10 @@ CLONE_REPO="Clone Freetz-NG repo"
 PULL_REPO="Update Freetz-NG repo"
 MAKE_CONFIG="Call menuconfig"
 MAKE="Call make"
+MAKE_CLEAN="Call make clean"
+MAKE_DISTCLEAN="Call make distclean"
 
 CONFIGURATION="Configuration"
-EXIT="Exit"
 
 pressAnyKey() {
 	echo; read -n 1 -p "Press Enter to continue..." && clear
@@ -32,6 +41,13 @@ hasTextBlock() {
 	[ -r "$1" ] && grep -Fq "$2" "$1"
 }
 
+isAutoLoginEnabled() {
+	if [ -r "/etc/inittab" ]; then
+		grep -q "agetty --skip-login --nonewline --noissue --autologin $USERNAME --noclear" /etc/inittab
+	else
+		hasTextBlock "$AUTOLOGIN_FILE" "$(autoLoginTextBlock)"
+	fi
+}
 
 autoLoginTextBlock() {
 LINE=`sed -n 's/^ExecStart=-\\/sbin\\/agetty /&--autologin '$USERNAME' /p' /etc/systemd/system/getty.target.wants/getty@tty1.service`
@@ -48,7 +64,7 @@ while :; do
 	# [ "$(sudo passwd --status $USERNAME | cut -d' ' -f2)" = 'NP' ] && value+=("$SET_PASSWD" "$USERNAME has no password, you can set one.")
 	value+=("$SET_PASSWD" "set or update the password for $USERNAME.")
 	([ -r "$AUTOSTART_FILE" ] && grep -q "^\[ -x $THIS_FILE \] && $THIS_FILE$" "$AUTOSTART_FILE") && value+=("$NO_AUTOSTART" "Disables this script's autostart on login.") || value+=("$YES_AUTOSTART" "Enables this script's autostart on login.")
-	hasTextBlock "$AUTOLOGIN_FILE" "$(autoLoginTextBlock)" && value+=("$NO_AUTOLOGIN" "Disables the autologin on virtual console 1.") || value+=("$YES_AUTOLOGIN" "Enables the autologin on virtual console 1.")
+	isAutoLoginEnabled && value+=("$NO_AUTOLOGIN" "Disables the autologin on virtual console 1.") || value+=("$YES_AUTOLOGIN" "Enables the autologin on virtual console 1.")
 	CHOICE=$(whiptail --title "Freetz-NG build config menu" --menu "Build Config Menu" 15 98 6 "${value[@]}" 3>&1 1>&2 2>&3)
 	[ "$?" -eq 0 ] || return
 
@@ -60,19 +76,27 @@ while :; do
 		"$SET_PASSWD")
 		PASSWORD1=$(whiptail --passwordbox "please enter your secret password" 8 78 --title "password dialog" 3>&1 1>&2 2>&3)
 		[ "$?" == 0 ] && PASSWORD2=$(whiptail --passwordbox "please reenter your secret password" 8 78 --title "password dialog" 3>&1 1>&2 2>&3)
-		[ "$?" == 0 ] && passwd << EOD
+		[ "$?" == 0 ] && sudo passwd "$USERNAME" << EOD
 ${PASSWORD1}
 ${PASSWORD2}
 EOD
 		;;
 		"$YES_AUTOLOGIN")
-			sudo mkdir -p $(dirname "$AUTOLOGIN_FILE")
-			MULTILINE_STRING=$(autoLoginTextBlock)
-			echo "$MULTILINE_STRING" | sudo tee -a "$AUTOLOGIN_FILE" >/dev/null
+			if [ -r "/etc/inittab" ]; then
+				sudo sed -i '/^tty1::respawn:\/sbin\/getty 38400 tty1$/s/getty/agetty --skip-login --nonewline --noissue --autologin '$USERNAME' --noclear/' /etc/inittab
+			else
+				sudo mkdir -p $(dirname "$AUTOLOGIN_FILE")
+				MULTILINE_STRING=$(autoLoginTextBlock)
+				echo "$MULTILINE_STRING" | sudo tee -a "$AUTOLOGIN_FILE" >/dev/null
+			fi
 		;;
 		"$NO_AUTOLOGIN")
-			REMAINING=$(awk 'FNR==NR{a[$0];next} !($0 in a)' <(autoLoginTextBlock) <(cat "$AUTOLOGIN_FILE"))
-			[ -n "$REMAINING" ] && echo "$REMAINING" | sudo tee "$AUTOLOGIN_FILE" >/dev/null || (sudo rm "$AUTOLOGIN_FILE" && sudo rmdir --ignore-fail-on-non-empty -p $(dirname "$AUTOLOGIN_FILE"))
+			if [ -r "/etc/inittab" ]; then
+				sudo sed -i '/^tty1::respawn:\/sbin\/agetty --skip-login --nonewline --noissue --autologin '$USERNAME' --noclear 38400 tty1$/s/agetty --skip-login --nonewline --noissue --autologin builduser --noclear/getty/' /etc/inittab
+			else
+				REMAINING=$(awk 'FNR==NR{a[$0];next} !($0 in a)' <(autoLoginTextBlock) <(cat "$AUTOLOGIN_FILE"))
+				[ -n "$REMAINING" ] && echo "$REMAINING" | sudo tee "$AUTOLOGIN_FILE" >/dev/null || (sudo rm "$AUTOLOGIN_FILE" && sudo rmdir --ignore-fail-on-non-empty -p $(dirname "$AUTOLOGIN_FILE"))
+			fi
 		;;
                 "$YES_AUTOSTART")
 			echo "[ -x $THIS_FILE ] && $THIS_FILE" | sudo tee -a "$AUTOSTART_FILE" >/dev/null
@@ -93,6 +117,8 @@ while :; do
 	[ -d "$LOCAL_REPO" ] && value+=("$PULL_REPO" "Updates the local Freetz-NG clone.")
 	[ -d "$LOCAL_REPO" ] && value+=("$MAKE_CONFIG" "Configure the firmware (\"make menuconfig\").")
 	[ -r "$LOCAL_REPO/.config" ] && value+=("$MAKE" "Build the firmware (\"make\").")
+	[ -d "$LOCAL_REPO" ] && value+=("$MAKE_CLEAN" "Remove unpacked images and some cache files (\"make clean\").")
+	[ -d "$LOCAL_REPO" ] && value+=("$MAKE_DISTCLEAN" "Clean everything except the download directory (\"make distclean\").")
 	value+=("$CONFIGURATION" "Config/Tweak this tool.")
 
 	CHOICE=$(whiptail --title "Freetz-NG build menu" --menu "Main Menu" 15 98 6 "${value[@]}" 3>&1 1>&2 2>&3)
@@ -112,6 +138,14 @@ while :; do
 		;;
 		"$MAKE")
 			(cd "$LOCAL_REPO" && run-in-docker make)
+			pressAnyKey
+		;;
+		"$MAKE_CLEAN")
+			(cd "$LOCAL_REPO" && run-in-docker make clean)
+			pressAnyKey
+		;;
+		"$MAKE_DISTCLEAN")
+			(cd "$LOCAL_REPO" && run-in-docker make distclean)
 			pressAnyKey
 		;;
 		"$DOCKER_PULL")
