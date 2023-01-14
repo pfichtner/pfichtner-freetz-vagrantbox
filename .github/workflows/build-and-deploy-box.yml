@@ -8,10 +8,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-    - name: Install Vagrant
+    - name: Install Virtualbox and Vagrant
       run: |
         sudo apt-get update
-        sudo apt-get install -y vagrant
+        sudo apt-get install -y virtualbox vagrant
     - name: Generate VirtualBox Image
       run: |
         cd alpine && vagrant up --provider virtualbox
