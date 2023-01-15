@@ -19,12 +19,12 @@ jobs:
         cd alpine && vagrant halt
     - name: Export virtual machine to OVA
       run: |
-        cd alpine && packer build -var 'vm_name=pfichtner-freetzg-buildsystem' -var 'output_directory=ovaexport' vagrantbox2ova.json
+        cd alpine && packer build -var 'vm_name=pfichtner-freetzng-buildsystem' -var 'output_directory=ovaexport' vagrantbox2ova.json
     - name: Destroy virtual machine
       run: |
         cd alpine && vagrant destroy -f
     - name: Release OVA
       uses: ncipollo/release-action@v1.11.2
       with:
-        artifacts: "alpine/ovaexport/pfichtner-freetzg-buildsystem.ova"
+        artifacts: "alpine/ovaexport/pfichtner-freetzng-buildsystem.ova"
 

@@ -19,9 +19,9 @@ SCRIPT
 # backwards compatibility). Please don't change it unless you know what
 # you're doing.
 Vagrant.configure("2") do |config|
-  config.vm.hostname = "pfichtner-freetzg-buildsystem"
+  config.vm.hostname = "pfichtner-freetzng-buildsystem"
   config.vm.provider :virtualbox do |vb|
-    vb.name = "pfichtner-freetzg-buildsystem"
+    vb.name = "pfichtner-freetzng-buildsystem"
   end
 
   # The most common configuration options are documented and commented below.
