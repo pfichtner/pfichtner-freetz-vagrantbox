@@ -5,7 +5,7 @@
   - contains only the things necessary to run docker
   - Uses https://github.com/pfichtner/pfichtner-freetz for build related things (checkout/clone/configuration/build)
   - The docker image gets downloaded automatically as soon it's needed which will result in another ~500 MB that gets downloaded (once until it's forced to update) and results in ~1.5 GB disc space in the virtual machine. 
-  - If [Freetz-NG's PREREQUISITES](https://github.com/Freetz-NG/freetz-ng/blob/master/docs/PREREQUISITES.md) change the docker image gets updated and can be pulled (the docker image contains everything that is needed to build actual Freetz-NG). 
+  - If [Freetz-NG's PREREQUISITES](https://github.com/Freetz-NG/freetz-ng/blob/master/docs/PREREQUISITES.md) are updated the docker image gets updated as well and can be pulled (the docker image contains everything that is needed to build the actual Freetz-NG). 
   - So there's (hopefully) nothing more to do to update the docker image. 
 - Comes with a [TUI](https://en.wikipedia.org/wiki/Text-based_user_interface) for configuring/building/cleaning Freetz-NG as well for doing simple maintenance tasks. 
 - Autologins the "builduser" user on tty1
