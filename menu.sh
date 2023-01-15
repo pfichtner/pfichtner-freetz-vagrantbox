@@ -77,7 +77,7 @@ isAutostartEnabled() {
 
 enableAutostart() {
     isAutostartEnabled || echo "[ -x $THIS_FILE ] && $THIS_FILE" | sudo tee -a "$AUTOSTART_FILE" >/dev/null
-    [ -r "$AUTOSTART_FILE" ] && chown builduser "$AUTOSTART_FILE"
+    [ -r "$AUTOSTART_FILE" ] && sudo chown builduser "$AUTOSTART_FILE"
 }
 
 disableAutostart() {

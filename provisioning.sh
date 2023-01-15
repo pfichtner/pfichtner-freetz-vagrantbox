@@ -93,7 +93,7 @@ isAutostartEnabled() {
 
 enableAutostart() {
     isAutostartEnabled || echo "[ -x $THIS_FILE ] && $THIS_FILE" | sudo tee -a "$AUTOSTART_FILE" >/dev/null
-    [ -r "$AUTOSTART_FILE" ] && chown builduser "$AUTOSTART_FILE"
+    [ -r "$AUTOSTART_FILE" ] && sudo chown builduser "$AUTOSTART_FILE"
 }
 
 disableAutostart() {
@@ -120,7 +120,7 @@ configSubMenu() {
 
 	    case $CHOICE in
 		    "$DOCKER_PULL")
-			    run-in-docker bash -c "cd $LOCAL_REPO && git pull"
+			    docker pull "$IMAGE"
 			    pressAnyKey
 		    ;;
 		    "$SET_PASSWD")
@@ -155,7 +155,7 @@ mainChoice() {
 		    pressAnyKey
 	    ;;
 	    "$PULL_REPO")
-		    (cd "$LOCAL_REPO" && git pull)
+		    run-in-docker bash -c "cd $LOCAL_REPO && git pull"
 		    pressAnyKey
 	    ;;
 	    "$MAKE_CONFIG")
