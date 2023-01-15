@@ -12,6 +12,9 @@
 - "builduser" comes without a password set
 
 # Usage example
+## How this virtual machine welcomes you on tty1
+[![tty1]([{image-url}](http://pfichtner.github.io/pfichtner-freetz-vagrantbox-asciinema/tty1.png))]([{video-url}](http://pfichtner.github.io/pfichtner-freetz-vagrantbox-asciinema/pfichtner-freetzg-buildsystem-screen0.webm) "Virtual machine startup")
+
 ## Clone the repo, do menuconfig and start make
 <a href="http://pfichtner.github.io/pfichtner-freetz-vagrantbox-asciinema/initial-clone-menuconfig-start-build.html"><img src="http://pfichtner.github.io/pfichtner-freetz-vagrantbox-asciinema/initial-clone-menuconfig-start-build.png" /></a>
 
