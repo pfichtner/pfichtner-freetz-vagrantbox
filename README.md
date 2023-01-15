@@ -1,4 +1,4 @@
-My interpretation of a virtual machine to run Freetz-NG builds
+# My interpretation of a virtual machine to run Freetz-NG builds
 
 - only 200 MB in size
   - contains only the things necessary to run docker
@@ -11,9 +11,19 @@ My interpretation of a virtual machine to run Freetz-NG builds
 - Does start the TUI on "builduser" logins
 - "builduser" comes without a password set
 
-Security remarks
+# Usage example
+## Clone the repo, do menuconfig and start make
+<a href="http://pfichtner.github.io/pfichtner-freetz-vagrantbox-asciinema/initial-clone-menuconfig-start-build.html"><img src="http://pfichtner.github.io/pfichtner-freetz-vagrantbox-asciinema/initial-clone-menuconfig-start-build.png" /></a>
+
+## Tweak the build system
+<a href="http://pfichtner.github.io/pfichtner-freetz-vagrantbox-asciinema/tweak-tool.html/"><img src="http://pfichtner.github.io/pfichtner-freetz-vagrantbox-asciinema/tweak-tool.png" /></a>
+
+## The initial docker pull that will run the first time automatically
+<a href="http://pfichtner.github.io/pfichtner-freetz-vagrantbox-asciinema/initial-pull.html/"><img src="http://pfichtner.github.io/pfichtner-freetz-vagrantbox-asciinema/initial-pull.png" /></a>
+
+# Security remarks
 - The box is based on a [(alpine) vagrant box](https://app.vagrantup.com/generic/boxes/alpine38) so there's a default user named vagrant (with password vagrant) as well as the default root passsword vagrant. 
 
-What could be done
+# What could be done furthermore
 - Possibility to update "freetz-menu" etc. as well
 - Machine could be still more minimalistic e.g. when based on [barge-os](https://github.com/bargees/barge-os) or even directl on [buildroot](https://buildroot.org/)
