@@ -12,7 +12,7 @@ My interpretation of a virtual machine to run Freetz-NG builds
 - "builduser" comes without a password set
 
 Security remarks
-- The box is based on a [(alpine) vagrant box](https://app.vagrantup.com/generic/boxes/alpine312) so there's a default user named vagrant (with password vagrant) as well as the default root passsword vagrant. 
+- The box is based on a [(alpine) vagrant box](https://app.vagrantup.com/generic/boxes/alpine38) so there's a default user named vagrant (with password vagrant) as well as the default root passsword vagrant. 
 
 What could be done
 - Machine could be based on [barge-os](https://github.com/bargees/barge-os) or even directl on [buildroot](https://buildroot.org/)
