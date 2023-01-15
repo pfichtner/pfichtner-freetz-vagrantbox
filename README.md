@@ -1,7 +1,7 @@
 # My interpretation of a virtual machine to run Freetz-NG builds on
 
 - you don't want to/you can't run docker on your bare metal? Here comes a minimal virtual machine that acts as a wrapper. 
-- only 200 MB in size
+- only ~200 MB in size (download the OVA from the [release page](/releases))
   - contains only the things necessary to run docker
   - Uses https://github.com/pfichtner/pfichtner-freetz for build related things (checkout/clone/configuration/build)
   - The docker image gets downloaded automatically as soon it's needed which will result in another ~500 MB that gets downloaded (once until it's forced to update) and results in ~1.5 GB disc space in the virtual machine. 
