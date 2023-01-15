@@ -26,9 +26,19 @@
 ## The initial docker pull that will run the first time automatically
 <a href="http://pfichtner.github.io/pfichtner-freetz-vagrantbox-asciinema/initial-pull.html/"><img src="http://pfichtner.github.io/pfichtner-freetz-vagrantbox-asciinema/initial-pull.png" /></a>
 
+# Artifacts
+What does the OVA contains? 
+- Linux base image (currently alpine linux, based on vagrant so it comes with a "vagrant" user)
+- `/usr/bin/freetz-menu` a TUI to easily do the builds and to tweak the virtual machine (see screenshots/screencasts)
+- `/usr/bin/run-inside-docker` command to run commands in the docker container, freetz-menu takes use of it for all "make" calls as well for the git clone/pull. 
+- `/usr/bin/docker-shell` a login replacement that could be used to directly get caught inside the docker container instead of the virtual machine (currently not used). If you want to take use of it replace a user's login shell by `/usr/bin/docker-shell`
+- A "builduser" that get's logged in on machine startup on tty1
+- Autostart of freetz-menu on "builduser" login
+
 # Security remarks
 - The box is based on a [(alpine) vagrant box](https://app.vagrantup.com/generic/boxes/alpine38) so there's a default user named vagrant (with password vagrant) as well as the default root passsword vagrant. 
 
 # What could be done furthermore
 - Possibility to update "freetz-menu" etc. as well
 - Machine could be still more minimalistic e.g. when based on [barge-os](https://github.com/bargees/barge-os) or even directl on [buildroot](https://buildroot.org/)
+- Tweak entry to set language/locale/keyboard
