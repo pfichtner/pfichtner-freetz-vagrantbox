@@ -1,7 +1,10 @@
-name: Build, Export, and Release VirtualBox Image
+name: Build, Export and Release VirtualBox Image
 
 on:
   workflow_dispatch:
+  push:
+    tags:
+    - '*'
 
 jobs:
   build:
@@ -21,8 +24,7 @@ jobs:
       run: |
         cd alpine && vagrant destroy -f
     - name: Release OVA
-      uses: actions/upload-artifact@v2
+      uses: ncipollo/release-action@v1.11.2
       with:
-        if-no-files-found: error
-        name: pfichtner-freetzg-buildsystem.ova
-        path: alpine/ovaexport/pfichtner-freetzg-buildsystem.ova
+        artifacts: "alpine/ovaexport/pfichtner-freetzg-buildsystem.ova"
+
