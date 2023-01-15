@@ -120,7 +120,7 @@ configSubMenu() {
 
 	    case $CHOICE in
 		    "$DOCKER_PULL")
-			    docker pull "$IMAGE"
+			    run-in-docker bash -c "cd $LOCAL_REPO && git pull"
 			    pressAnyKey
 		    ;;
 		    "$SET_PASSWD")
@@ -212,7 +212,8 @@ EOF
 chmod +x /usr/bin/docker-shell
 
 # shell could be also the /bin/docker-shell which gives a login shell directly in the docker container
-command -v useradd && useradd -m -G sudo,docker -s /bin/bash builduser || (adduser -D -s /bin/bash builduser && addgroup builduser docker)
+command -v useradd && useradd -m -G sudo,docker -s /bin/bash builduser || (adduser -D -s /bin/bash builduser && addgroup builduser docker && chmod 755 /home/builduser)
+
 DEFAULT_USER=$(basename /etc/sudoers.d/*)
 if [ -r "/etc/sudoers.d/$DEFAULT_USER" ]; then
 	cp -a /etc/sudoers.d/$DEFAULT_USER /etc/sudoers.d/builduser && sed -i "s/$DEFAULT_USER/builduser/g" /etc/sudoers.d/builduser

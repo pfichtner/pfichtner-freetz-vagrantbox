@@ -139,7 +139,7 @@ mainChoice() {
 		    pressAnyKey
 	    ;;
 	    "$PULL_REPO")
-		    (cd "$LOCAL_REPO" && git pull)
+                    run-in-docker bash -c "cd $LOCAL_REPO && git pull"
 		    pressAnyKey
 	    ;;
 	    "$MAKE_CONFIG")
