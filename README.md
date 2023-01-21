@@ -40,5 +40,8 @@ What does the OVA contains?
 
 # What could be done furthermore
 - Possibility to update "freetz-menu" etc. as well
-- Machine could be still more minimalistic e.g. when based on [barge-os](https://github.com/bargees/barge-os) or even directl on [buildroot](https://buildroot.org/)
 - Tweak entry to set language/locale/keyboard
+- Machine could be still more minimalistic e.g. when 
+  - based on [barge-os](https://github.com/bargees/barge-os): still not minimalistic, unknown how to extends with additional packages
+  - directly based on [buildroot](https://buildroot.org/): long running build process, much low-level-know-how needed
+  - build using [linuxkit](https://github.com/linuxkit/linuxkit): hard to extends additional packages like `newt` (would have to build containers for each)
