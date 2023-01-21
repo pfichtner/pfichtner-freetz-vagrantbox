@@ -9,7 +9,7 @@
   - So there's (hopefully) nothing more to do to update the docker image. 
 - Comes with a [TUI](https://en.wikipedia.org/wiki/Text-based_user_interface) for configuring/building/cleaning Freetz-NG as well for doing simple maintenance tasks. 
 - Autologins the "builduser" user on tty1
-- Does start the TUI on "builduser" logins
+- Does start the [TUI](https://en.wikipedia.org/wiki/Text-based_user_interface) on "builduser" logins
 - "builduser" comes without a password set
 
 # Usage example
@@ -29,7 +29,7 @@
 # Artifacts
 What does the OVA contains? 
 - Linux base image (currently alpine linux, based on vagrant so it comes with a "vagrant" user)
-- `/usr/bin/freetz-menu` a TUI to easily do the builds and to tweak the virtual machine (see screenshots/screencasts)
+- `/usr/bin/freetz-menu` a [TUI](https://en.wikipedia.org/wiki/Text-based_user_interface) to easily do the builds and to tweak the virtual machine (see screenshots/screencasts)
 - `/usr/bin/run-inside-docker` command to run commands in the docker container, freetz-menu takes use of it for all "make" calls as well for the git clone/pull. 
 - `/usr/bin/docker-shell` a login replacement that could be used to directly get caught inside the docker container instead of the virtual machine (currently not used). If you want to take use of it replace a user's login shell by `/usr/bin/docker-shell`
 - A "builduser" that get's logged in on machine startup on tty1
