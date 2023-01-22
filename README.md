@@ -45,3 +45,4 @@ What does the OVA contains?
   - based on [barge-os](https://github.com/bargees/barge-os): still not minimalistic, unknown how to extends with additional packages
   - directly based on [buildroot](https://buildroot.org/): long running build process, much low-level-know-how needed
   - build using [linuxkit](https://github.com/linuxkit/linuxkit): hard to extends additional packages like `newt` (would have to build containers for each)
+  - build using [tinycorelinux](http://www.tinycorelinux.net/): Based on buildroot/busybox, very small, can be extended by debian packages! Runs InMem only?
