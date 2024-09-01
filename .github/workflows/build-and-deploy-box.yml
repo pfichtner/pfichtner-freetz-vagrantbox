@@ -8,9 +8,19 @@ on:
 
 jobs:
   build:
-    runs-on: macos-12
+    runs-on: macos-14
     steps:
     - uses: actions/checkout@v2
+    - name: Install VirtualBox
+      run: |
+        brew install --cask virtualbox
+    - name: Install Vagrant
+      run: |
+        brew install vagrant
+    - name: Verify Installations
+      run: |
+        virtualbox --help
+        vagrant --version
     - name: Create virtual machine using vagrant
       run: |
         cd alpine && vagrant up --provider virtualbox
