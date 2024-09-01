@@ -182,7 +182,7 @@ mainChoice() {
 		    configSubMenu
 	    ;;
             "$POWEROFF")
-		    sudo poweroff
+		    clear ; sudo poweroff
     esac
 }
 
