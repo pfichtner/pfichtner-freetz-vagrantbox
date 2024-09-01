@@ -38,8 +38,8 @@ MAKE_CONFIG="Call menuconfig"
 MAKE="Call make"
 MAKE_CLEAN="Call make clean"
 MAKE_DISTCLEAN="Call make distclean"
-
 CONFIGURATION="Configuration"
+POWEROFF="Poweroff"
 
 pressAnyKey() {
 	echo; read -n 1 -p "Press Enter to continue..." && clear
@@ -181,6 +181,8 @@ mainChoice() {
 	    "$CONFIGURATION")
 		    configSubMenu
 	    ;;
+            "$POWEROFF")
+		    sudo poweroff
     esac
 }
 
@@ -194,8 +196,9 @@ main() {
 	    [ -d "$LOCAL_REPO" ] && value+=("$MAKE_CLEAN" "Remove unpacked images and some cache files (\"make clean\").")
 	    [ -d "$LOCAL_REPO" ] && value+=("$MAKE_DISTCLEAN" "Clean everything except the download directory (\"make distclean\").")
 	    value+=("$CONFIGURATION" "Config/Tweak this tool.")
+	    value+=("$POWEROFF" "Shutdown this machine.")
 
-	    CHOICE=$(whiptail --title "Freetz-NG build menu" --menu "Main Menu" 15 98 6 "${value[@]}" 3>&1 1>&2 2>&3)
+	    CHOICE=$(whiptail --title "Freetz-NG build menu" --menu "Main Menu" 15 98 7 "${value[@]}" 3>&1 1>&2 2>&3)
 	    [ "$?" -eq 0 ] || exit
 	    mainChoice "$CHOICE"
     done
