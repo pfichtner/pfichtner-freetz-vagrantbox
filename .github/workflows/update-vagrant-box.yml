@@ -12,6 +12,11 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
+      - name: Add HashiCorp GPG key and repository
+        run: |
+          wget -O- https://apt.releases.hashicorp.com/gpg | gpg --dearmor >> /usr/share/keyrings/hashicorp-archive-keyring.gpg
+          echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" >> /etc/apt/sources.list.d/hashicorp.list
+
       - name: Update package lists
         run: sudo apt-get update
 
