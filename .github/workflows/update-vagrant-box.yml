@@ -2,7 +2,7 @@ name: Update Vagrant Box
 
 on:
   schedule:
-    - cron: '@weekly'
+    - cron: '31 11 * * 3'
   workflow_dispatch:
 
 jobs:
