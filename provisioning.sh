@@ -102,6 +102,7 @@ disableAutostart() {
 
 
 configSubMenu() {
+	UPDATE_SYSTEM="Update linux system"
 	DOCKER_PULL="Update internal build system"
 	SET_PASSWD="Set password for $USERNAME"
 	NO_AUTOSTART="Disable script autostart"
@@ -110,6 +111,7 @@ configSubMenu() {
 	YES_AUTOLOGIN="Enable autologin"
 	while :; do
 	    value=()
+	    value+=("$UPDATE_SYSTEM" "Updates the linux distribution.")
 	    value+=("$DOCKER_PULL" "Checks docker hub for update of the internal docker image.")
 	    # [ "$(sudo passwd --status $USERNAME | cut -d' ' -f2)" = 'NP' ] && value+=("$SET_PASSWD" "$USERNAME has no password, you can set one.")
 	    value+=("$SET_PASSWD" "set or update the password for $USERNAME.")
@@ -119,6 +121,10 @@ configSubMenu() {
 	    [ "$?" -eq 0 ] || return
 
 	    case $CHOICE in
+		    "$UPDATE_SYSTEM")
+			    sudo apk update && sudo apk upgrade
+			    pressAnyKey
+		    ;;
 		    "$DOCKER_PULL")
 			    docker pull "$IMAGE"
 			    pressAnyKey
