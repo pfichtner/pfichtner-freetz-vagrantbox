@@ -1,0 +1,64 @@
+name: Update Vagrant Box
+
+on:
+  schedule:
+    - cron: '@weekly'
+  workflow_dispatch:
+
+jobs:
+  update-vagrant-box:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Install Vagrant & jq
+        run: sudo apt-get install -y vagrant jq
+
+      - name: Get Current Vagrant Box Version
+        id: current_version
+        run: |
+          CURRENT_VERSION=$(grep -oP '(?<=config.vm.box = "boxomatic/alpine-)\d+\.\d+' alpine/Vagrantfile)
+          echo "Current version: $CURRENT_VERSION"
+          echo "CURRENT_VERSION=$CURRENT_VERSION" >> $GITHUB_ENV
+
+      - name: Get Latest Available Vagrant Box Version
+        id: latest_version
+        run: |
+          LATEST_VERSION=$(vagrant cloud search "boxomatic/alpine-" --json | \
+          jq -r '.[].name' | grep -oP '\d+\.\d+' | sort -V | tail -n1)
+
+          if [ -z "$LATEST_VERSION" ]; then
+            echo "No new version found."
+            exit 0
+          fi
+          
+          echo "Latest version: $LATEST_VERSION"
+          echo "LATEST_VERSION=$LATEST_VERSION" >> $GITHUB_ENV
+
+      - name: Compare Versions and Update Vagrantfile
+        if: env.LATEST_VERSION != env.CURRENT_VERSION
+        run: |
+          sed -i "s/config.vm.box = \"boxomatic\/alpine-[^\"]*/config.vm.box = \"boxomatic\/alpine-${LATEST_VERSION}/" alpine/Vagrantfile
+          echo "Updated Vagrantfile to version ${LATEST_VERSION}"
+
+      - name: Commit and Push Changes
+        if: env.LATEST_VERSION != env.CURRENT_VERSION
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout -b update-vagrant-box-${LATEST_VERSION}
+          git add alpine/Vagrantfile
+          git commit -m "Update Vagrant box to ${LATEST_VERSION}"
+          git push origin update-vagrant-box-${LATEST_VERSION}
+
+      - name: Create Pull Request
+        if: env.LATEST_VERSION != env.CURRENT_VERSION
+        uses: peter-evans/create-pull-request@v6
+        with:
+          title: "Update Vagrant box to ${LATEST_VERSION}"
+          body: "This PR updates the Vagrant box version to `${LATEST_VERSION}`."
+          base: main
+          branch: update-vagrant-box-${LATEST_VERSION}
+          labels: dependencies, vagrant
+
