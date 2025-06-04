@@ -64,9 +64,9 @@ jobs:
         if: env.LATEST_VERSION != env.CURRENT_VERSION
         uses: peter-evans/create-pull-request@v6
         with:
-          title: "Update Vagrant box to ${LATEST_VERSION}"
-          body: "This PR updates the Vagrant box version to `${LATEST_VERSION}`."
+          title: "Update Vagrant box to ${{ env.LATEST_VERSION }}"
+          body: "This PR updates the Vagrant box version to `${{ env.LATEST_VERSION }}`."
           base: main
-          branch: update-vagrant-box-${LATEST_VERSION}
+          branch: update-vagrant-box-${{ env.LATEST_VERSION }}
           labels: dependencies, vagrant
 
