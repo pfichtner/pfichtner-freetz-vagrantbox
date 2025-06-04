@@ -29,7 +29,7 @@ jobs:
         cd alpine && vagrant halt
     - name: Export virtual machine to OVA
       run: |
-        cd alpine && packer build -var 'vm_name=pfichtner-freetzng-buildsystem' -var 'output_directory=ovaexport' vagrantbox2ova.json
+        cd alpine && packer plugins install github.com/hashicorp/virtualbox && packer build -var 'vm_name=pfichtner-freetzng-buildsystem' -var 'output_directory=ovaexport' vagrantbox2ova.json
     - name: Destroy virtual machine
       run: |
         cd alpine && vagrant destroy -f
