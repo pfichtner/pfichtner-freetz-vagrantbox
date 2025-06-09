@@ -28,7 +28,7 @@
 
 # Artifacts
 What does the OVA contains? 
-- Linux base image (currently alpine linux, based on vagrant so it comes with a "vagrant" user)
+- Linux base image (currently alpine linux, based on vagrant)
 - `/usr/bin/freetz-menu` a [TUI](https://en.wikipedia.org/wiki/Text-based_user_interface) to easily do the builds and to tweak the virtual machine (see screenshots/screencasts)
 - `/usr/bin/run-inside-docker` command to run commands in the docker container, freetz-menu takes use of it for all "make" calls as well for the git clone/pull. 
 - `/usr/bin/docker-shell` a login replacement that could be used to directly get caught inside the docker container instead of the virtual machine (currently not used). If you want to take use of it replace a user's login shell by `/usr/bin/docker-shell`
@@ -36,7 +36,7 @@ What does the OVA contains?
 - Autostart of freetz-menu on "builduser" login
 
 # Security remarks
-- The box is based on a [(alpine) vagrant box](https://app.vagrantup.com/generic/boxes/alpine38) so there's a default user named vagrant (with password vagrant) as well as the default root passsword vagrant. 
+- The box is based on a [(alpine) vagrant box](https://portal.cloud.hashicorp.com/vagrant/discover/boxomatic/alpine-3.22). The default user (vagrant) has been removed. 
 
 # What could be done furthermore
 - Possibility to update "freetz-menu" etc. as well
@@ -46,4 +46,4 @@ What does the OVA contains?
   - directly based on [buildroot](https://buildroot.org/): long running build process, much low-level-know-how needed
   - build using [linuxkit](https://github.com/linuxkit/linuxkit): hard to extends additional packages like `newt` (would have to build containers for each)
   - based on [tinycorelinux](http://www.tinycorelinux.net/): Based on buildroot/busybox, very small, can be extended by debian packages! Runs InMem only?
-  - based on [slitaz](https://www.slitaz.org/): Very, very small, no docker available :-(
+  - based on [slitaz](https://www.slitaz.org/): Very, very small (smaller than alpine?), no docker available :-(
