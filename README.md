@@ -15,16 +15,16 @@
 # Usage example
 
 ## How this virtual machine welcomes you on tty1
-<img alt="Virtual machine startup" src="http://pfichtner.github.io/pfichtner-freetz-vagrantbox-asciinema/pfichtner-freetzg-buildsystem-screen0.gif" width="640" height="480"/>
+<img alt="Virtual machine startup" src="http://pfichtner.github.io/assets/pfichtner-freetz-vagrantbox-asciinema/pfichtner-freetzg-buildsystem-screen0.gif" width="640" height="480"/>
 
 ## Clone the repo, do menuconfig and start make
-<a href="http://pfichtner.github.io/pfichtner-freetz-vagrantbox-asciinema/initial-clone-menuconfig-start-build.html"><img src="http://pfichtner.github.io/pfichtner-freetz-vagrantbox-asciinema/initial-clone-menuconfig-start-build.png" /></a>
+<a href="http://pfichtner.github.io/assets/pfichtner-freetz-vagrantbox-asciinema/initial-clone-menuconfig-start-build.html"><img src="http://pfichtner.github.io/assets/pfichtner-freetz-vagrantbox-asciinema/initial-clone-menuconfig-start-build.png" /></a>
 
 ## Tweak the build system
-<a href="http://pfichtner.github.io/pfichtner-freetz-vagrantbox-asciinema/tweak-tool.html/"><img src="http://pfichtner.github.io/pfichtner-freetz-vagrantbox-asciinema/tweak-tool.png" /></a>
+<a href="http://pfichtner.github.io/assets/pfichtner-freetz-vagrantbox-asciinema/tweak-tool.html/"><img src="http://pfichtner.github.io/assets/pfichtner-freetz-vagrantbox-asciinema/tweak-tool.png" /></a>
 
 ## The initial docker pull that will run the first time automatically
-<a href="http://pfichtner.github.io/pfichtner-freetz-vagrantbox-asciinema/initial-pull.html/"><img src="http://pfichtner.github.io/pfichtner-freetz-vagrantbox-asciinema/initial-pull.png" /></a>
+<a href="http://pfichtner.github.io/assets/pfichtner-freetz-vagrantbox-asciinema/initial-pull.html/"><img src="http://pfichtner.github.io/assets/pfichtner-freetz-vagrantbox-asciinema/initial-pull.png" /></a>
 
 # Artifacts
 What does the OVA contains? 
