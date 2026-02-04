@@ -4,37 +4,31 @@ on:
   workflow_dispatch:
   push:
     tags:
-    - '*'
+      - '*'
 
 jobs:
   build:
-    runs-on: macos-13
+    runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
-    - name: Install VirtualBox
-      run: |
-        brew install --cask virtualbox
-    - name: Install Vagrant
-      run: |
-        brew install vagrant
-    - name: Verify Installations
-      run: |
-        virtualbox --help
-        vagrant --version
-    - name: Create virtual machine using vagrant
-      run: |
-        cd alpine && vagrant up --provider virtualbox
-    - name: Shutdown virtual machine
-      run: |
-        cd alpine && vagrant halt
-    - name: Export virtual machine to OVA
-      run: |
-        cd alpine && packer plugins install github.com/hashicorp/virtualbox && packer build -var 'vm_name=pfichtner-freetzng-buildsystem' -var 'output_directory=ovaexport' vagrantbox2ova.json
-    - name: Destroy virtual machine
-      run: |
-        cd alpine && vagrant destroy -f
-    - name: Release OVA
-      uses: ncipollo/release-action@v1.11.2
-      with:
-        artifacts: "alpine/ovaexport/pfichtner-freetzng-buildsystem.ova"
-
+      - uses: actions/checkout@v4
+      - name: Install VirtualBox + Vagrant + Packer
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y virtualbox vagrant packer
+      - name: Verify installations
+        run: |
+          vagrant --version
+          VBoxManage --version
+          packer --version
+      - name: Export Vagrant VM directly to OVA with Packer
+        run: |
+          cd alpine
+          packer init .
+          packer build \
+            -var 'vm_name=pfichtner-freetzng-buildsystem' \
+            -var 'output_directory=ovaexport' \
+            vagrantbox2ova.json
+      - name: Release OVA
+        uses: ncipollo/release-action@v1
+        with:
+          artifacts: "alpine/ovaexport/pfichtner-freetzng-buildsystem.ova"
