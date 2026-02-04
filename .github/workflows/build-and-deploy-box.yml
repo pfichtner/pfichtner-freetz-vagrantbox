@@ -22,7 +22,13 @@ jobs:
           sudo apt-get update
       - name: Install Vagrant and Packer
         run: |
-          sudo apt-get install -y vagrant packer
+          sudo apt-get install -y vagrant
+      # Install Packer 1.7.x (legacy JSON compatible)
+      - name: Install Packer 1.7.x
+        run: |
+          wget https://releases.hashicorp.com/packer/1.7.10/packer_1.7.10_linux_amd64.zip
+          unzip packer_1.7.10_linux_amd64.zip
+          sudo mv packer /usr/local/bin/
       - name: Verify installations
         run: |
           vagrant --version
