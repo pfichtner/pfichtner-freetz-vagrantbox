@@ -43,7 +43,7 @@ jobs:
             sleep 2
           done
           echo "VM is powered off."
-    - name: Export VM to OVA
+      - name: Export VM to OVA
         run: |
           cd alpine
           mkdir -p ovaexport
