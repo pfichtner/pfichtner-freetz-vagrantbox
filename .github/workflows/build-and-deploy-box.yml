@@ -20,28 +20,39 @@ jobs:
           curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg
           echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/hashicorp.list
           sudo apt-get update
-      - name: Install Vagrant and Packer
+      - name: Install Vagrant
         run: |
           sudo apt-get install -y vagrant
-      # Install Packer 1.7.x (legacy JSON compatible)
-      - name: Install Packer 1.7.x
-        run: |
-          wget https://releases.hashicorp.com/packer/1.7.10/packer_1.7.10_linux_amd64.zip
-          unzip -o packer_1.7.10_linux_amd64.zip -d packer_tmp
-          sudo mv -f packer_tmp/packer /usr/local/bin/
-          rm -rf packer_tmp packer_1.7.10_linux_amd64.zip
       - name: Verify installations
         run: |
           vagrant --version
           VBoxManage --version
-          packer --version
-      - name: Export Vagrant VM directly to OVA with Packer
+      - name: Start Vagrant VM
         run: |
           cd alpine
-          packer build \
-            -var 'vm_name=pfichtner-freetzng-buildsystem' \
-            -var 'output_directory=ovaexport' \
-            vagrantbox2ova.json
+          vagrant up --provider virtualbox
+      - name: Cleanup VM before export
+        run: |
+          cd alpine
+          cat ./cleanup_vm.sh | vagrant ssh -c "sudo bash -s"
+      - name: Wait for VM to shutdown
+        run: |
+          echo "Waiting for VM to power off..."
+          while [ "$(VBoxManage showvminfo pfichtner-freetzng-buildsystem --machinereadable | grep ^VMState=)" != 'VMState="poweroff"' ]; do
+            echo "VM is still running..."
+            sleep 2
+          done
+          echo "VM is powered off."
+    - name: Export VM to OVA
+        run: |
+          cd alpine
+          mkdir -p ovaexport
+          VBoxManage export pfichtner-freetzng-buildsystem -o ovaexport/pfichtner-freetzng-buildsystem.ova
+      - name: Destroy VM
+        run: |
+          cd alpine
+          vagrant destroy -f
+
       - name: Release OVA
         uses: ncipollo/release-action@v1
         with:
