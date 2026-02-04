@@ -27,8 +27,9 @@ jobs:
       - name: Install Packer 1.7.x
         run: |
           wget https://releases.hashicorp.com/packer/1.7.10/packer_1.7.10_linux_amd64.zip
-          unzip -o packer_1.7.10_linux_amd64.zip
-          sudo mv -f packer /usr/local/bin/
+          unzip -o packer_1.7.10_linux_amd64.zip -d packer_tmp
+          sudo mv -f packer_tmp/packer /usr/local/bin/
+          rm -rf packer_tmp packer_1.7.10_linux_amd64.zip
       - name: Verify installations
         run: |
           vagrant --version
