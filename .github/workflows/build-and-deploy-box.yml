@@ -38,7 +38,6 @@ jobs:
       - name: Export Vagrant VM directly to OVA with Packer
         run: |
           cd alpine
-          packer init .
           packer build \
             -var 'vm_name=pfichtner-freetzng-buildsystem' \
             -var 'output_directory=ovaexport' \
