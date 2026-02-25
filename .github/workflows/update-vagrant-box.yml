@@ -50,23 +50,14 @@ jobs:
           sed -i "s/config.vm.box = \"boxomatic\/alpine-[^\"]*/config.vm.box = \"boxomatic\/alpine-${LATEST_VERSION}/" alpine/Vagrantfile
           echo "Updated Vagrantfile to version ${LATEST_VERSION}"
 
-      - name: Commit and Push Changes
-        if: env.LATEST_VERSION != env.CURRENT_VERSION
-        run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git checkout -b update-vagrant-box-${LATEST_VERSION}
-          git add alpine/Vagrantfile
-          git commit -m "Update Vagrant box to ${LATEST_VERSION}"
-          git push origin update-vagrant-box-${LATEST_VERSION}
-
       - name: Create Pull Request
         if: env.LATEST_VERSION != env.CURRENT_VERSION
         uses: peter-evans/create-pull-request@v6
         with:
+          commit-message: "Update Vagrant box to ${{ env.LATEST_VERSION }}"
           title: "Update Vagrant box to ${{ env.LATEST_VERSION }}"
           body: "This PR updates the Vagrant box version to `${{ env.LATEST_VERSION }}`."
           base: main
           branch: update-vagrant-box-${{ env.LATEST_VERSION }}
+          delete-branch: true
           labels: dependencies, vagrant
-
