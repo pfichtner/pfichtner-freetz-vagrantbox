@@ -8,50 +8,73 @@ on:
 jobs:
   update-vagrant-box:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v6
 
-      - name: Add HashiCorp GPG key and repository
+      - name: Install jq & curl
         run: |
-          wget -O- https://apt.releases.hashicorp.com/gpg | gpg --dearmor | sudo tee /usr/share/keyrings/hashicorp-archive-keyring.gpg
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y jq curl
+
+      # Optional: keep Vagrant, but NOT used for version detection anymore
+      - name: Install Vagrant
+        run: |
+          set -euo pipefail
+          wget -O- https://apt.releases.hashicorp.com/gpg | gpg --dearmor | sudo tee /usr/share/keyrings/hashicorp-archive-keyring.gpg >/dev/null
           echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/hashicorp.list
-
-      - name: Update package lists
-        run: sudo apt-get update
-
-      - name: Install Vagrant & jq
-        run: sudo apt-get install -y vagrant jq
+          sudo apt-get update
+          sudo apt-get install -y vagrant
 
       - name: Get Current Vagrant Box Version
-        id: current_version
         run: |
-          CURRENT_VERSION=$(grep -oP '(?<=config.vm.box = "boxomatic/alpine-)\d+\.\d+' alpine/Vagrantfile)
+          set -euo pipefail
+
+          CURRENT_VERSION=$(grep -oP '(?<=config.vm.box = "boxomatic/alpine-)\d+\.\d+' alpine/Vagrantfile || true)
+
+          if [ -z "${CURRENT_VERSION:-}" ]; then
+            echo "Failed to detect CURRENT_VERSION"
+            exit 1
+          fi
+
           echo "Current version: $CURRENT_VERSION"
           echo "CURRENT_VERSION=$CURRENT_VERSION" >> $GITHUB_ENV
 
-      - name: Get Latest Available Vagrant Box Version
-        id: latest_version
+      - name: Get Latest Available Vagrant Box Version (robust)
         run: |
-          LATEST_VERSION=$(vagrant cloud search "boxomatic/alpine-" --json | \
-          jq -r '.[].name' | grep -oP '\d+\.\d+' | sort -V | tail -n1)
+          set -euo pipefail
 
-          if [ -z "$LATEST_VERSION" ]; then
-            echo "No new version found."
+          # Fetch JSON directly (more reliable than vagrant CLI)
+          JSON=$(curl -fsSL "https://app.vagrantup.com/api/v1/search?q=boxomatic/alpine-")
+
+          LATEST_VERSION=$(echo "$JSON" \
+            | jq -r '.boxes[].tag' \
+            | grep -oP '\d+\.\d+' \
+            | sort -V \
+            | tail -n1)
+
+          if [ -z "${LATEST_VERSION:-}" ]; then
+            echo "Could not determine LATEST_VERSION"
+            echo "LATEST_VERSION=" >> $GITHUB_ENV
             exit 0
           fi
-          
+
           echo "Latest version: $LATEST_VERSION"
           echo "LATEST_VERSION=$LATEST_VERSION" >> $GITHUB_ENV
 
-      - name: Compare Versions and Update Vagrantfile
-        if: env.LATEST_VERSION != env.CURRENT_VERSION
+      - name: Update Vagrantfile
+        if: env.LATEST_VERSION != '' && env.LATEST_VERSION != env.CURRENT_VERSION
         run: |
-          sed -i "s/config.vm.box = \"boxomatic\/alpine-[^\"]*/config.vm.box = \"boxomatic\/alpine-${LATEST_VERSION}/" alpine/Vagrantfile
+          set -euo pipefail
+
+          sed -i -E 's|(config.vm.box = "boxomatic/alpine-)[0-9]+\.[0-9]+|\1'"${LATEST_VERSION}"'|' alpine/Vagrantfile
+
           echo "Updated Vagrantfile to version ${LATEST_VERSION}"
 
       - name: Create Pull Request
-        if: env.LATEST_VERSION != env.CURRENT_VERSION
+        if: env.LATEST_VERSION != '' && env.LATEST_VERSION != env.CURRENT_VERSION
         uses: peter-evans/create-pull-request@v8
         with:
           commit-message: "Update Vagrant box to ${{ env.LATEST_VERSION }}"
